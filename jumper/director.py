@@ -1,8 +1,6 @@
 from terminal_service import TerminalService
-from word import Word
-from parachute import Parachute
-from hint import Hint
-
+from puzzle import Puzzle
+from jumper import Jumper
 
 class Director:
     """A person who directs the game. 
@@ -11,9 +9,8 @@ class Director:
 
     Attributes:
         is_playing (boolean): Whether or not to keep playing.
-        parachute (Parachute): The game's jumper with its parachute
-        word (Word): The game's puzzle that is a word
-        hint (Hint): The hint to be given to the jumper according to his guesses
+        jumper (Jumper): The game's jumper with its parachute
+        puzzle (Puzzle): The game's puzzle that is a word
         last_letter: The last letter the jumper guessed
         terminal_service: For getting and displaying information on the terminal.
     """
@@ -25,9 +22,8 @@ class Director:
             self (Director): an instance of Director.
         """
         self._is_playing = True
-        self._parachute = Parachute()
-        self._word = Word()
-        self._hint = Hint(self._word.get_word())
+        self._jumper = Jumper()
+        self._puzzle = Puzzle()
         self._last_letter = ''
         self._terminal_service = TerminalService()
         
@@ -50,23 +46,24 @@ class Director:
             self (Director): An instance of Director.
         """
         self._last_letter = self._terminal_service.read_text("\nGuess a letter [a-z]: ")
-        self._parachute.add_letter(self._last_letter)
         
     def _do_updates(self):
-        """Keeps watch on where the seeker is moving.
+        """If the Jumper guesses incorrectly, it will be asked him to cut a line
+            If the Jumper does not have a parachute anymore, the game is over
 
         Args:
             self (Director): An instance of Director.
         """
-        if not self._hint.watch_letter(self._last_letter):
-            if not self._parachute.cut_line():
+        if not self._puzzle.watch_letter(self._last_letter):
+            self._jumper.cut_line()
+            if not self._jumper.has_parachute():
                 self._is_playing = False
-                self._show_hint()
-                self._show_parachute()
+                self._puzzle.draw_hint()
+                self._jumper.draw_parachute()
                 self._terminal_service.write_text('I am sorry, you did not find the puzzle.')
         
     def _do_outputs(self):
-        """Provides a hint for the seeker to use.
+        """Provides a hint for the Jumper to use.
 
         Args:
             self (Director): An instance of Director.
@@ -74,22 +71,11 @@ class Director:
         if not self._is_playing:
             return
 
-        self._show_hint()
-        self._show_parachute()
+        self._puzzle.draw_hint()
+        self._jumper.draw_parachute()
 
-        if self._hint.is_found():
+        if self._puzzle.is_found():
             self._terminal_service.write_text('Congratulations, you have found the puzzle.')
             self._is_playing = False
 
-    def _show_hint(self):
-        hint = self._hint.get_hint()
-        complete_text = ''
-        for n in range(len(hint)):
-            complete_text += hint[n] + ' '
-        self._terminal_service.write_text(f'\n{complete_text}\n')
 
-    def _show_parachute(self):
-        parachute = self._parachute.get_parachute()
-        for parachute_item in parachute:
-            self._terminal_service.write_text(f'{parachute_item}')
-        self._terminal_service.write_text('')

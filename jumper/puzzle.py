@@ -1,36 +1,40 @@
+# Puzzle
+import random
+from terminal_service import TerminalService
 
-class Hint:
-    """ The Hint is a clue to the player (or the Jumper).
+class Puzzle:
+    """ The Puzzle to be found by a player (or the Jumper). A word is the puzzle.
     
-    The responsibility of Hint is to compare a word (the puzzle) with the letters guessed by the player and show the result.
+    The responsibility of Puzzle is to supply a random word and to indicate if the player guessed letter is correct or not.
     
     Attributes:
-        _word: the word used in the game as a puzzle
-        _hint: The hint with blank lines and or the correct letters guessed by the player in the word
-        _letters: The correct guesses player made
-    """
+        list_of_words (List[string]): A list of possible words to be selected.
+        word: The puzzle itself which is a word from the list
+        hint: The hint with blank lines and or the correct letters guessed by the player in the word
+        letters: The correct guesses player made
+        terminal_service: For getting and displaying information on the terminal.
+"""
 
-    def __init__(self, word):
-        """Constructs a new Hint.
+    def __init__(self):
+        """Constructs a new Puzzle.
 
         Args:
-            self (Hint): An instance of Hint.
+            self (Puzzle): An instance of Puzzle.
         """
-        self._word = word                           # stores the word as Puzzle
+        self._list_of_words = ( ["ambush", "banana", "chronicle", "diatonic", "earnestly", "fantasy", "garland",
+            "helical", "industriousness", "jeopardize", "kaleidoscope", "linger", "manuscript", "newbie",
+            "ostracism", "phimosis", "quartile", "raspberry", "snowflake", "thunderbolt", "umbrella",
+            "volunteer", "worthless", "xylophone", "yogurt", "zambian" ] )
+        self._word = self._list_of_words[ random.randint(0, 25) ]
         self._hint = "_" * len(self._word)          # repeats "_" the quantity of letters; all blank lines
         self._letters = ''                          # no letter guesses yet
+        self._terminal_service = TerminalService()
     
-    def get_hint(self):
-        """Gets a hint for the jumper.
-
-        Args:
-            self (Hint): An instance of Hint.
-        
-        Returns:
-            string: A hint for the jumper.
-        """
-        
-        return self._hint
+    def draw_hint(self):
+        complete_text = ''
+        for n in range(len(self._hint)):
+            complete_text += self._hint[n] + ' '
+        self._terminal_service.write_text(f'\n{complete_text}\n')
 
     def is_found(self):
         """Whether or not the Puzzle Word has been found.
